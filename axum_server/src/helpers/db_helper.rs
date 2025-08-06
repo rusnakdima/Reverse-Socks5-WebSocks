@@ -1,17 +1,13 @@
 /* sys lib */
 use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::{Duration, Utc};
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::{postgres::PgPoolOptions, Error, Row};
 use std::env;
 use uuid::Uuid;
 
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct Claims {
-  pub sub: Uuid,
-  pub role: String,
-  pub exp: usize,
-}
+/* models */
+use crate::models::claims::Claims;
 
 pub struct DbHelper {
   pub pool: sqlx::Pool<sqlx::Postgres>,
@@ -34,26 +30,6 @@ impl DbHelper {
     //   .expect("Failed to run migrations");
 
     Self { pool: db_pool }
-  }
-
-  pub async fn verify_admin_token(&self, token: &str) -> Result<bool, jsonwebtoken::errors::Error> {
-    let jwt_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
-    let token_data = decode::<Claims>(
-      token,
-      &DecodingKey::from_secret(jwt_secret.as_ref()),
-      &Validation::default(),
-    )?;
-    Ok(token_data.claims.role == "admin")
-  }
-
-  pub async fn verify_token(&self, token: &str) -> Result<bool, jsonwebtoken::errors::Error> {
-    let jwt_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
-    let token_data = decode::<Claims>(
-      token,
-      &DecodingKey::from_secret(jwt_secret.as_ref()),
-      &Validation::default(),
-    )?;
-    Ok(token_data.claims.exp > Utc::now().timestamp() as usize)
   }
 }
 
