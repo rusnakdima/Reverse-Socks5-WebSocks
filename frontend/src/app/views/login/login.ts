@@ -20,6 +20,7 @@ export class LoginComponent {
   password = signal('');
   error = signal('');
   message = signal('');
+  token = signal('');
 
   constructor(
     private http: HttpClient,
@@ -35,8 +36,11 @@ export class LoginComponent {
       .subscribe({
         next: (response: ResponseModel) => {
           if (response.status == ResponseStatus.Success) {
+            this.token.set(response.data);
+            this.message.set('Login successful');
+            this.error.set('');
             localStorage.setItem('token', response.data);
-            this.startConnection(response.data);
+            setTimeout(() => (window.location.href = '/users/connected'), 2000);
           } else {
             this.error.set(response.message);
             this.message.set('');
@@ -45,33 +49,6 @@ export class LoginComponent {
         error: (err: HttpErrorResponse) => {
           this.error.set(err.error?.message || 'Invalid credentials');
           this.message.set('');
-        },
-      });
-  }
-
-  startConnection(token: string) {
-    this.http
-      .get<ResponseModel>('http://localhost:7878/connection/start', {
-        headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
-      })
-      .subscribe({
-        next: (response: ResponseModel) => {
-          if (response.status == ResponseStatus.Success) {
-            this.message.set('Connection initiated successfully');
-            this.error.set('');
-            setTimeout(() => (window.location.href = '/users/connected'), 2000);
-          } else {
-            this.error.set(response.message);
-            this.message.set('');
-          }
-        },
-        error: (err: HttpErrorResponse) => {
-          console.log(err);
-          this.error.set(err.error?.text || 'Failed to initiate connection');
-          this.message.set('');
-          if (err.status === 401) {
-            this.router.navigate(['/login']);
-          }
         },
       });
   }

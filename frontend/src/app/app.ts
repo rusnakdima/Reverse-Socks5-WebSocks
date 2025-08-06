@@ -1,5 +1,5 @@
 /* sys lib */
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
 
@@ -38,6 +38,7 @@ export class App {
               this.isAuthenticated.set(true);
               this.username.set(response.data.username || 'User');
               this.isAdmin = response.data.role === 'admin';
+              this.startConnection(token);
             } else {
               this.logout();
             }
@@ -52,6 +53,23 @@ export class App {
       this.logout();
       this.isLoading.set(false);
     }
+  }
+
+  startConnection(token: string) {
+    this.http
+      .get<ResponseModel>('http://localhost:7878/connection/start', {
+        headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+      })
+      .subscribe({
+        next: (response: ResponseModel) => {
+          if (response.status == ResponseStatus.Error) {
+            console.error(response.message);
+          }
+        },
+        error: (err: HttpErrorResponse) => {
+          console.log(err);
+        },
+      });
   }
 
   logout() {

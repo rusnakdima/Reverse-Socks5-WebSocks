@@ -36,11 +36,38 @@ export class ConnectedUsersComponent {
   loadUsers() {
     const token = localStorage.getItem('token');
     this.http
-      .get<Connection[]>('http://localhost:7878/connection/list-users', {
+      .get<ResponseModel>('http://localhost:7878/connection/list-users', {
         headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
       })
       .subscribe({
-        next: (users) => this.users.set(users),
+        next: (response: ResponseModel) => {
+          if (response.status === ResponseStatus.Success) {
+            this.users.set(response.data);
+          } else {
+            this.users.set([
+              {
+                username: 'Tester',
+                ip_address: '127.0.0.1',
+                connected_at: new Date().toISOString(),
+              },
+              {
+                username: 'Tester2',
+                ip_address: '127.0.0.1',
+                connected_at: new Date().toISOString(),
+              },
+              {
+                username: 'Tester3',
+                ip_address: '127.0.0.1',
+                connected_at: new Date().toISOString(),
+              },
+              {
+                username: 'Tester4',
+                ip_address: '127.0.0.1',
+                connected_at: new Date().toISOString(),
+              },
+            ]);
+          }
+        },
         error: (err: HttpErrorResponse) => {
           this.error.set(err.error?.message || 'Failed to load users');
           if (err.status === 401) {
