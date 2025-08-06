@@ -40,7 +40,7 @@ pub async fn authenticate_user(
 ) -> Result<Option<String>, Error> {
   let user = sqlx::query(
     r#"
-        SELECT id, password, role FROM users WHERE username = $1
+        SELECT * FROM users WHERE username = $1
         "#,
   )
   .bind(username)
@@ -53,6 +53,7 @@ pub async fn authenticate_user(
       let jwt_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
       let claims = Claims {
         sub: row.get("id"),
+        username: row.get("username"),
         role: row.get("role"),
         exp: (Utc::now() + Duration::hours(24)).timestamp() as usize,
       };

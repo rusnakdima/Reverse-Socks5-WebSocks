@@ -32,7 +32,7 @@ export class App {
           headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
         })
         .subscribe({
-          next: (response) => {
+          next: (response: ResponseModel) => {
             if (response.status === ResponseStatus.Success) {
               this.isAuthenticated.set(true);
               this.username.set(response.data.username || 'User');
