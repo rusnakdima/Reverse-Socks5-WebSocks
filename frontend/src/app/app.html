@@ -5,6 +5,14 @@
       @if (isAuthenticated()) {
         <div class="flex items-center space-x-4">
           <span class="text-lg">Welcome, {{ username() }}</span>
+          @if (isAdmin) {
+            <button
+              routerLink="/register"
+              class="bg-green-700 text-white p-2 rounded hover:bg-green-900"
+            >
+              Register User
+            </button>
+          }
           <button
             (click)="logout()"
             class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"

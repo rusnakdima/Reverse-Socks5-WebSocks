@@ -1,14 +1,14 @@
 /* sys lib */
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 
 /* models */
 import { ResponseModel, ResponseStatus } from '@models/response';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterModule],
   templateUrl: './app.html',
 })
 export class App {
@@ -23,6 +23,7 @@ export class App {
   isAuthenticated = signal(false);
   username = signal('');
   isLoading = signal(true);
+  isAdmin: boolean = false;
 
   checkToken() {
     const token = localStorage.getItem('token');
@@ -36,6 +37,7 @@ export class App {
             if (response.status === ResponseStatus.Success) {
               this.isAuthenticated.set(true);
               this.username.set(response.data.username || 'User');
+              this.isAdmin = response.data.role === 'admin';
             } else {
               this.logout();
             }

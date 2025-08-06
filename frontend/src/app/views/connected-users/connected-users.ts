@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ResponseModel, ResponseStatus } from '@models/response';
 
 interface Connection {
   username: string;
@@ -23,14 +24,19 @@ export class ConnectedUsersComponent {
   users = signal<Connection[]>([]);
   error = signal('');
 
-  constructor(private http: HttpClient, private router: Router) {
+  isAdmin: boolean = false;
+
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {
     this.loadUsers();
   }
 
   loadUsers() {
     const token = localStorage.getItem('token');
     this.http
-      .get<Connection[]>('http://localhost:8080/api/users/connected', {
+      .get<Connection[]>('http://localhost:7878/connection/list-users', {
         headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
       })
       .subscribe({
@@ -42,9 +48,5 @@ export class ConnectedUsersComponent {
           }
         },
       });
-  }
-
-  navigateToRegister() {
-    this.router.navigate(['/register']);
   }
 }

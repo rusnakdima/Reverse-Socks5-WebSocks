@@ -21,7 +21,10 @@ export class LoginComponent {
   error = signal('');
   message = signal('');
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {}
 
   login() {
     this.http
@@ -54,9 +57,14 @@ export class LoginComponent {
       .subscribe({
         next: (response: ResponseModel) => {
           console.log(response);
-          this.message.set('Connection initiated successfully');
-          this.error.set('');
-          setTimeout(() => this.router.navigate(['/users/connected']), 2000);
+          if (response.status == ResponseStatus.Success) {
+            this.message.set('Connection initiated successfully');
+            this.error.set('');
+            setTimeout(() => (window.location.href = '/users/connected'), 2000);
+          } else {
+            this.error.set(response.message);
+            this.message.set('');
+          }
         },
         error: (err: HttpErrorResponse) => {
           console.log(err);
