@@ -3,8 +3,9 @@ use axum::Json;
 use axum_extra::headers::{authorization::Bearer, Authorization};
 
 /* helpers */
-use crate::helpers::db_helper::{authenticate_user, create_user, DbHelper};
+use crate::helpers::db_helper::{authenticate_user, create_user};
 
+use crate::helpers::jwt_helper::JwtHelper;
 /* models */
 use crate::models::{
   appstate::AppState,
@@ -41,7 +42,7 @@ impl AuthService {
     auth: Authorization<Bearer>,
     data: RegisterReq,
   ) -> Json<ResponseModel> {
-    match DbHelper::new().await.verify_admin_token(auth.token()).await {
+    match JwtHelper::new().verify_admin_token(auth.token()).await {
       Ok(is_admin) => {
         if !is_admin {
           return Json(ResponseModel {
@@ -79,19 +80,24 @@ impl AuthService {
   }
 
   pub async fn verify(auth: Authorization<Bearer>) -> Json<ResponseModel> {
-    match DbHelper::new().await.verify_token(auth.token()).await {
+    match JwtHelper::new().verify_token(auth.token()).await {
       Ok(is_valid) => {
         if is_valid {
           Json(ResponseModel {
             status: ResponseStatus::Success,
             message: "".to_string(),
-            data: DataValue::Bool(true),
+            data: DataValue::Object(
+              serde_json::value::to_value(
+                JwtHelper::new().parse_token(auth.token()).await.unwrap(),
+              )
+              .unwrap(),
+            ),
           })
         } else {
           Json(ResponseModel {
             status: ResponseStatus::Error,
             message: "".to_string(),
-            data: DataValue::Bool(false),
+            data: DataValue::String("".to_string()),
           })
         }
       }
