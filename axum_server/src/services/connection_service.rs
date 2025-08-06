@@ -19,9 +19,8 @@ pub struct ConnectionService;
 impl ConnectionService {
   pub async fn connect(state: AppState, auth: Authorization<Bearer>) -> Json<ResponseModel> {
     let ws_url = state.ws_address.as_str();
-    println!("ws_url: {}", ws_url);
 
-    match TcpStream::connect("127.0.0.1:2020") {
+    match TcpStream::connect(ws_url) {
       Ok(mut stream) => {
         let decoded = jsonwebtoken::decode::<Claims>(
           auth.token(),
