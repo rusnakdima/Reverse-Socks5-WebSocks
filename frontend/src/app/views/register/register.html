@@ -1,0 +1,42 @@
+<div class="max-w-md mx-auto bg-white p-8 rounded shadow-md">
+  <h2 class="text-2xl font-bold mb-4">Register User</h2>
+  <form (ngSubmit)="register()">
+    <div class="mb-4">
+      <label class="block text-gray-700">Username</label>
+      <input
+        [(ngModel)]="username"
+        name="username"
+        type="text"
+        class="w-full p-2 border rounded"
+        placeholder="Enter username"
+        required
+      />
+    </div>
+    <div class="mb-4">
+      <label class="block text-gray-700">Password</label>
+      <input
+        [(ngModel)]="password"
+        name="password"
+        type="password"
+        class="w-full p-2 border rounded"
+        placeholder="Enter password"
+        required
+      />
+    </div>
+    <div class="mb-6">
+      <label class="block text-gray-700">Role</label>
+      <select [(ngModel)]="role" name="role" class="w-full p-2 border rounded">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <button
+      type="submit"
+      class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+    >
+      Register
+    </button>
+  </form>
+  <p *ngIf="message()" class="text-green-500 mt-4">{{ message() }}</p>
+  <p *ngIf="error()" class="text-red-500 mt-4">{{ error() }}</p>
+</div>

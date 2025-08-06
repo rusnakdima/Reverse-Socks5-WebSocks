@@ -1,0 +1,26 @@
+<div class="max-w-4xl mx-auto bg-white p-8 rounded shadow-md">
+  <h2 class="text-2xl font-bold mb-4">Connected Users</h2>
+  <table class="w-full border">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="p-2">Username</th>
+        <th class="p-2">IP Address</th>
+        <th class="p-2">Connected At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users()" class="border-t">
+        <td class="p-2">{{ user.username }}</td>
+        <td class="p-2">{{ user.ip_address }}</td>
+        <td class="p-2">{{ user.connected_at | date : "medium" }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <button
+    (click)="navigateToRegister()"
+    class="mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+  >
+    Register User
+  </button>
+  <p *ngIf="error()" class="text-red-500 mt-4">{{ error() }}</p>
+</div>
