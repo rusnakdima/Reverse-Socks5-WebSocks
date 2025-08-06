@@ -56,7 +56,6 @@ export class LoginComponent {
       })
       .subscribe({
         next: (response: ResponseModel) => {
-          console.log(response);
           if (response.status == ResponseStatus.Success) {
             this.message.set('Connection initiated successfully');
             this.error.set('');
