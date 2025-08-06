@@ -33,8 +33,9 @@ impl AuthController {
   }
 
   pub async fn verify(
+    State(state): State<AppState>,
     TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
   ) -> Json<ResponseModel> {
-    AuthService::verify(auth).await
+    AuthService::verify(state, auth).await
   }
 }

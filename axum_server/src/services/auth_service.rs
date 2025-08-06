@@ -18,7 +18,7 @@ pub struct AuthService;
 
 impl AuthService {
   pub async fn login(state: AppState, req: LoginReq) -> Json<ResponseModel> {
-    match authenticate_user(state.db_pool.clone(), &req.username, &req.password).await {
+    match authenticate_user(state, &req.username, &req.password).await {
       Ok(Some(token)) => Json(ResponseModel {
         status: ResponseStatus::Success,
         message: "Login successful".to_string(),
@@ -42,70 +42,47 @@ impl AuthService {
     auth: Authorization<Bearer>,
     data: RegisterReq,
   ) -> Json<ResponseModel> {
-    match JwtHelper::new().verify_admin_token(auth.token()).await {
-      Ok(is_admin) => {
-        if !is_admin {
-          return Json(ResponseModel {
-            status: ResponseStatus::Error,
-            message: "Admin access required".to_string(),
-            data: DataValue::Object(serde_json::json!({})),
-          });
-        }
-        match create_user(
-          state.db_pool.clone(),
-          &data.username,
-          &data.password,
-          &data.role,
-        )
-        .await
-        {
-          Ok(_) => Json(ResponseModel {
-            status: ResponseStatus::Success,
-            message: "User registered successfully".to_string(),
-            data: DataValue::Object(serde_json::json!({})),
-          }),
-          Err(e) => Json(ResponseModel {
-            status: ResponseStatus::Error,
-            message: format!("Server error: {}", e),
-            data: DataValue::Object(serde_json::json!({})),
-          }),
-        }
-      }
+    let is_admin = JwtHelper::new()
+      .verify_admin_token(&state, auth.token())
+      .await;
+    if !is_admin {
+      return Json(ResponseModel {
+        status: ResponseStatus::Error,
+        message: "Admin access required".to_string(),
+        data: DataValue::Object(serde_json::json!({})),
+      });
+    }
+    match create_user(state.db_pool, &data.username, &data.password, &data.role).await {
+      Ok(_) => Json(ResponseModel {
+        status: ResponseStatus::Success,
+        message: "User registered successfully".to_string(),
+        data: DataValue::Object(serde_json::json!({})),
+      }),
       Err(e) => Json(ResponseModel {
         status: ResponseStatus::Error,
-        message: format!("Invalid token: {}", e),
+        message: format!("Server error: {}", e),
         data: DataValue::Object(serde_json::json!({})),
       }),
     }
   }
 
-  pub async fn verify(auth: Authorization<Bearer>) -> Json<ResponseModel> {
-    match JwtHelper::new().verify_token(auth.token()).await {
-      Ok(is_valid) => {
-        if is_valid {
-          Json(ResponseModel {
-            status: ResponseStatus::Success,
-            message: "".to_string(),
-            data: DataValue::Object(
-              serde_json::value::to_value(
-                JwtHelper::new().parse_token(auth.token()).await.unwrap(),
-              )
-              .unwrap(),
-            ),
-          })
-        } else {
-          Json(ResponseModel {
-            status: ResponseStatus::Error,
-            message: "".to_string(),
-            data: DataValue::String("".to_string()),
-          })
-        }
-      }
-      Err(err) => Json(ResponseModel {
+  pub async fn verify(state: AppState, auth: Authorization<Bearer>) -> Json<ResponseModel> {
+    let is_valid = JwtHelper::new().verify_token(&state, auth.token()).await;
+    if is_valid {
+      Json(ResponseModel {
+        status: ResponseStatus::Success,
+        message: "".to_string(),
+        data: DataValue::Object(
+          serde_json::value::to_value(JwtHelper::new().parse_token(&state, auth.token()).await)
+            .unwrap(),
+        ),
+      })
+    } else {
+      Json(ResponseModel {
         status: ResponseStatus::Error,
-        message: format!("Invalid token: {}", err),
-        data: DataValue::Object(serde_json::json!({})),
-      }),
+        message: "".to_string(),
+        data: DataValue::String("".to_string()),
+      })
     }
   }
 }

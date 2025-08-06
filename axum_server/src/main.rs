@@ -25,10 +25,12 @@ async fn main() {
   dotenv::dotenv().ok();
 
   let address = env::var("ADDRESS").unwrap_or_else(|_| "0.0.0.0:7878".to_string());
+  let jwt_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
   let state = appstate::AppState {
     db_pool: DbHelper::new().await.pool,
     ws_address: Arc::new("ws://localhost:2020".to_string()),
+    jwt_secret: jwt_secret
   };
 
   // Shared state for connected users

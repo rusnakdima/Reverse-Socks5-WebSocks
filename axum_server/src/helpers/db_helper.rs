@@ -7,7 +7,7 @@ use std::env;
 use uuid::Uuid;
 
 /* models */
-use crate::models::claims::Claims;
+use crate::models::{appstate::AppState, claims::Claims};
 
 pub struct DbHelper {
   pub pool: sqlx::Pool<sqlx::Postgres>,
@@ -34,7 +34,7 @@ impl DbHelper {
 }
 
 pub async fn authenticate_user(
-  pool: sqlx::Pool<sqlx::Postgres>,
+  state: AppState,
   username: &str,
   password: &str,
 ) -> Result<Option<String>, Error> {
@@ -44,13 +44,12 @@ pub async fn authenticate_user(
         "#,
   )
   .bind(username)
-  .fetch_optional(&pool)
+  .fetch_optional(&state.db_pool)
   .await?;
 
   if let Some(row) = user {
     let stored_password: String = row.get("password");
     if verify(password, &stored_password).unwrap() {
-      let jwt_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
       let claims = Claims {
         sub: row.get("id"),
         username: row.get("username"),
@@ -60,7 +59,7 @@ pub async fn authenticate_user(
       let token = encode(
         &Header::default(),
         &claims,
-        &EncodingKey::from_secret(jwt_secret.as_ref()),
+        &EncodingKey::from_secret(state.jwt_secret.as_ref()),
       )
       .unwrap();
       return Ok(Some(token));
