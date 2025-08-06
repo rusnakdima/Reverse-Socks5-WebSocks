@@ -9,11 +9,13 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let user of users()" class="border-t">
-        <td class="p-2">{{ user.username }}</td>
-        <td class="p-2">{{ user.ip_address }}</td>
-        <td class="p-2">{{ user.connected_at | date : "medium" }}</td>
-      </tr>
+      @for (user of users(); track $index) {
+        <tr class="border-t">
+          <td class="p-2">{{ user.username }}</td>
+          <td class="p-2">{{ user.ip_address }}</td>
+          <td class="p-2">{{ user.connected_at | date: "medium" }}</td>
+        </tr>
+      }
     </tbody>
   </table>
   <button
@@ -22,5 +24,7 @@
   >
     Register User
   </button>
-  <p *ngIf="error()" class="text-red-500 mt-4">{{ error() }}</p>
+  @if (error()) {
+    <p class="text-red-500 mt-4">{{ error() }}</p>
+  }
 </div>
