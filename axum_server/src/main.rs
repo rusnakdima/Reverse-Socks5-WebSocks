@@ -1,7 +1,5 @@
 /* imports */
-mod api;
 mod controllers;
-mod db;
 mod helpers;
 mod models;
 mod routes;
