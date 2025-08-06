@@ -29,7 +29,7 @@ async fn main() {
 
   let state = appstate::AppState {
     db_pool: DbHelper::new().await.pool,
-    ws_address: Arc::new("ws://localhost:2020".to_string()),
+    ws_address: Arc::new("wss://127.0.0.1:2020".to_string()),
     jwt_secret: jwt_secret
   };
 
