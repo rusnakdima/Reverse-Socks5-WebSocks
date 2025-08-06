@@ -19,6 +19,6 @@ impl AuthRoute {
       .route("/", get(Self::root))
       .route("/register", post(AuthController::register))
       .route("/login", post(AuthController::login))
-      .route("/verify", post(AuthController::verify))
+      .route("/verify", get(AuthController::verify))
   }
 }
