@@ -1,13 +1,15 @@
+/* sys lib */
 import { Component, signal } from '@angular/core';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+
+/* models */
 import { ResponseModel, ResponseStatus } from '@models/response';
+
+/* services */
+import { MainService } from '@services/main.service';
 
 @Component({
   selector: 'app-login',
@@ -23,33 +25,28 @@ export class LoginComponent {
   token = signal('');
 
   constructor(
-    private http: HttpClient,
+    private mainService: MainService,
     private router: Router,
   ) {}
 
   login() {
-    this.http
-      .post<ResponseModel>('http://localhost:7878/api/auth/login', {
-        username: this.username(),
-        password: this.password(),
-      })
-      .subscribe({
-        next: (response: ResponseModel) => {
-          if (response.status == ResponseStatus.Success) {
-            this.token.set(response.data);
-            this.message.set('Login successful');
-            this.error.set('');
-            localStorage.setItem('token', response.data);
-            window.location.href = '/users/connected';
-          } else {
-            this.error.set(response.message);
-            this.message.set('');
-          }
-        },
-        error: (err: HttpErrorResponse) => {
-          this.error.set(err.error?.message || 'Invalid credentials');
+    this.mainService.login(this.username(), this.password()).subscribe({
+      next: (response: ResponseModel) => {
+        if (response.status == ResponseStatus.Success) {
+          this.token.set(response.data);
+          this.message.set('Login successful');
+          this.error.set('');
+          localStorage.setItem('token', response.data);
+          window.location.href = '/users/connected';
+        } else {
+          this.error.set(response.message);
           this.message.set('');
-        },
-      });
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(err.error?.message || 'Invalid credentials');
+        this.message.set('');
+      },
+    });
   }
 }

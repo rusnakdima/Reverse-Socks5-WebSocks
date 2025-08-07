@@ -1,17 +1,17 @@
+/* sys lib */
 import { Component, signal } from '@angular/core';
-import {
-  HttpClient,
-  HttpHeaders,
-  HttpErrorResponse,
-} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ResponseModel } from '@models/response';
+
+/* services */
+import { MainService } from '@services/main.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
+  providers: [MainService],
   imports: [FormsModule, CommonModule],
   templateUrl: './register.html',
 })
@@ -22,22 +22,15 @@ export class RegisterComponent {
   message = signal('');
   error = signal('');
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private mainService: MainService,
+    private router: Router,
+  ) {}
 
   register() {
     const token = localStorage.getItem('token');
-    this.http
-      .post<ResponseModel>(
-        'http://localhost:7878/api/auth/register',
-        {
-          username: this.username(),
-          password: this.password(),
-          role: this.role(),
-        },
-        {
-          headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
-        }
-      )
+    this.mainService
+      .register(this.username(), this.password(), this.role())
       .subscribe({
         next: () => {
           this.message.set('User registered successfully');

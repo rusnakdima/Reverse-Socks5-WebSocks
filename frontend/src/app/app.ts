@@ -1,10 +1,13 @@
 /* sys lib */
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
 
 /* models */
 import { ResponseModel, ResponseStatus } from '@models/response';
+
+/* services */
+import { MainService } from '@services/main.service';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +16,7 @@ import { ResponseModel, ResponseStatus } from '@models/response';
 })
 export class App {
   constructor(
-    private http: HttpClient,
+    private mainService: MainService,
     private router: Router,
   ) {
     this.checkToken();
@@ -26,50 +29,36 @@ export class App {
   isAdmin: boolean = false;
 
   checkToken() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.http
-        .get<ResponseModel>('http://localhost:7878/api/auth/verify', {
-          headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
-        })
-        .subscribe({
-          next: (response: ResponseModel) => {
-            if (response.status === ResponseStatus.Success) {
-              this.isAuthenticated.set(true);
-              this.username.set(response.data.username || 'User');
-              this.isAdmin = response.data.role === 'admin';
-              this.startConnection(token);
-            } else {
-              this.logout();
-            }
-            this.isLoading.set(false);
-          },
-          error: () => {
-            this.logout();
-            this.isLoading.set(false);
-          },
-        });
-    } else {
-      this.logout();
-      this.isLoading.set(false);
-    }
+    this.mainService.checkToken().subscribe({
+      next: (response: ResponseModel) => {
+        if (response.status === ResponseStatus.Success) {
+          this.isAuthenticated.set(true);
+          this.username.set(response.data.username || 'User');
+          this.isAdmin = response.data.role === 'admin';
+          this.startConnection();
+        } else {
+          this.logout();
+        }
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.logout();
+        this.isLoading.set(false);
+      },
+    });
   }
 
-  startConnection(token: string) {
-    this.http
-      .get<ResponseModel>('http://localhost:7878/api/connection/start', {
-        headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
-      })
-      .subscribe({
-        next: (response: ResponseModel) => {
-          if (response.status == ResponseStatus.Error) {
-            console.error(response.message);
-          }
-        },
-        error: (err: HttpErrorResponse) => {
-          console.log(err);
-        },
-      });
+  startConnection() {
+    this.mainService.startConnection().subscribe({
+      next: (response: ResponseModel) => {
+        if (response.status == ResponseStatus.Error) {
+          console.error(response.message);
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        console.log(err);
+      },
+    });
   }
 
   logout() {
