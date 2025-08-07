@@ -29,7 +29,7 @@ export class App {
     const token = localStorage.getItem('token');
     if (token) {
       this.http
-        .get<ResponseModel>('http://localhost:7878/auth/verify', {
+        .get<ResponseModel>('http://localhost:7878/api/auth/verify', {
           headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
         })
         .subscribe({
@@ -57,7 +57,7 @@ export class App {
 
   startConnection(token: string) {
     this.http
-      .get<ResponseModel>('http://localhost:7878/connection/start', {
+      .get<ResponseModel>('http://localhost:7878/api/connection/start', {
         headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
       })
       .subscribe({

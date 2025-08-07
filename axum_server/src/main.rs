@@ -9,7 +9,6 @@ mod services;
 use std::env;
 use std::sync::Arc;
 use tower_http::cors::CorsLayer;
-use tower_http::services::ServeDir;
 
 /* helpers */
 use crate::helpers::db_helper::DbHelper;
@@ -30,17 +29,13 @@ async fn main() {
   let state = appstate::AppState {
     db_pool: DbHelper::new().await.pool,
     ws_address: Arc::new("wss://127.0.0.1:2020".to_string()),
-    jwt_secret: jwt_secret
+    jwt_secret: jwt_secret,
   };
-
-  // Shared state for connected users
-  // let connected_users = Arc::new(TokioMutex::new(Vec::new()));
 
   // Create Axum router
   let app = MainRoute::create_router()
     .await
     .layer(CorsLayer::permissive())
-    .fallback_service(ServeDir::new("../frontend/dist/frontend"))
     .with_state(state);
 
   // Start Axum server

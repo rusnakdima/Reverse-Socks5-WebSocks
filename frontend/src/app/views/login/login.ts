@@ -29,7 +29,7 @@ export class LoginComponent {
 
   login() {
     this.http
-      .post<ResponseModel>('http://localhost:7878/auth/login', {
+      .post<ResponseModel>('http://localhost:7878/api/auth/login', {
         username: this.username(),
         password: this.password(),
       })

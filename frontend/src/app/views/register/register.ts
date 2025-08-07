@@ -28,7 +28,7 @@ export class RegisterComponent {
     const token = localStorage.getItem('token');
     this.http
       .post<ResponseModel>(
-        'http://localhost:7878/auth/register',
+        'http://localhost:7878/api/auth/register',
         {
           username: this.username(),
           password: this.password(),

@@ -36,7 +36,7 @@ export class ConnectedUsersComponent {
   loadUsers() {
     const token = localStorage.getItem('token');
     this.http
-      .get<ResponseModel>('http://localhost:7878/connection/list-users', {
+      .get<ResponseModel>('http://localhost:7878/api/connection/list-users', {
         headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
       })
       .subscribe({
