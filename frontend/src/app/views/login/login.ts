@@ -40,7 +40,7 @@ export class LoginComponent {
             this.message.set('Login successful');
             this.error.set('');
             localStorage.setItem('token', response.data);
-            setTimeout(() => (window.location.href = '/users/connected'), 2000);
+            window.location.href = '/users/connected';
           } else {
             this.error.set(response.message);
             this.message.set('');
