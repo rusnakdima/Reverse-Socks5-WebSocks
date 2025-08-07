@@ -32,8 +32,9 @@ impl MainRoute {
       .allow_methods(vec![Method::GET, Method::POST, Method::PUT, Method::DELETE])
       .allow_headers([AUTHORIZATION, CONTENT_TYPE]);
 
-    let static_files = ServeDir::new("../frontend/dist/frontend/browser")
-      .fallback(ServeFile::new("../frontend/dist/frontend/browser/index.html"));
+    let static_files = ServeDir::new("../frontend/dist/frontend/browser").fallback(ServeFile::new(
+      "../frontend/dist/frontend/browser/index.html",
+    ));
 
     let router: Router<appstate::AppState> = Router::new()
       .route("/api", get(Self::root))
@@ -42,7 +43,8 @@ impl MainRoute {
         "/api/connection",
         ConnectionRoute::create_connection_route(),
       )
-      .route_service("/{*path}", get_service(static_files))
+      .route_service("/", get_service(static_files.clone()))
+      .route_service("/{*path}", get_service(static_files.clone()))
       .layer(cors.clone());
 
     router
